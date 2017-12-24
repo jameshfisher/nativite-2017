@@ -8,6 +8,7 @@ import (
   "io/ioutil"
   "fmt"
   "github.com/pusher/pusher-http-go"
+  "strings"
 )
 
 type Event struct {
@@ -53,9 +54,25 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
   _, err = pusherClient.Trigger("events", "new-event", data)
   if err != nil {
     fmt.Print("Error triggering event:", err.Error())
-  } else {
-    fmt.Println("Triggered Pusher event")
+    http.Error(w, `Could not trigger Pusher event`, 500)
+    return
   }
+
+  resp, err := http.Post(
+    "https://graph.facebook.com/v2.6/me/messages?access_token=" + os.Getenv("FACEBOOK_PAGE_ACCESS_TOKEN"),
+    "application/json",
+    strings.NewReader(`{"messaging_type": "UPDATE", "recipient": {"id": "1790075754377716"}, "message": {"text": "Hello, world"}}`),
+  )
+  if err != nil {
+    http.Error(w, `Could not send Messenger message`, 500)
+    return
+  }
+  messengerRespBody, err := ioutil.ReadAll(resp.Body)
+  if err != nil {
+    http.Error(w, `Could not read Messenger response body`, 500)
+    return
+  }
+  fmt.Println("Sent message; body: " + string(messengerRespBody))
 }
 
 func handleEvents(w http.ResponseWriter, r *http.Request) {
