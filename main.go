@@ -37,6 +37,14 @@ var events = []Event{
   Event{ChildName: "constance", RelativePoints: 1},
 }
 
+var realNames = map[string]string{
+  "sophie": "Sophie",
+  "constance": "Constance",
+  "victoire": "Victoire",
+  "felicite": "Félicité",
+  "james": "James",
+}
+
 func getEvents(w http.ResponseWriter, r *http.Request) {
   fmt.Println("Serving events")
   w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -46,6 +54,14 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
     return
   }
 	w.Write(j)
+}
+
+func messageText(doerNom string, bonne bool) string {
+  if bonne {
+    return realNames[doerNom] + " a fait une bonne chose! Dépêchez-vous, elle pourrait gagner le prix mystère!"
+  } else {
+    return realNames[doerNom] + " a fait une mauvaise chose! :O"
+  }
 }
 
 func postEvent(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +94,7 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
       Id: "1790075754377716",
     },
     Message: MessengerMessage{
-      Text: "Hello, world!",
+      Text: messageText(newEvent.ChildName, newEvent.RelativePoints > 0),
     },
   })
   if err != nil {
