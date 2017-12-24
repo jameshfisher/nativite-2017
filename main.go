@@ -32,10 +32,7 @@ type MessengerRequestBody struct {
 
 var pusherClient pusher.Client
 
-var events = []Event{
-  Event{ChildName: "sophie", RelativePoints: 1},
-  Event{ChildName: "constance", RelativePoints: 1},
-}
+var events = []Event{}
 
 var realNames = map[string]string{
   "sophie": "Sophie",
@@ -44,6 +41,8 @@ var realNames = map[string]string{
   "felicite": "Félicité",
   "james": "James",
 }
+
+var messengerRecipients = map[string]struct{}{}
 
 func getEvents(w http.ResponseWriter, r *http.Request) {
   fmt.Println("Serving events")
@@ -143,6 +142,19 @@ func handleEvents(w http.ResponseWriter, r *http.Request) {
   }
 }
 
+type MessengerWebhookBody struct {
+  Entries []MessengerWebhookEntry `json:"entry"`
+}
+type MessengerWebhookEntry struct {
+  Messagings []MessengerWebhookMessagings `json:"messaging"`
+}
+type MessengerWebhookMessagings struct {
+  Sender MessengerWebhookSender `json:"sender"`
+}
+type MessengerWebhookSender struct {
+  Id string `json:"string"`
+}
+
 func handleMessengerWebhook(w http.ResponseWriter, r *http.Request) {
   modes := r.URL.Query()["hub.mode"]
   tokens := r.URL.Query()["hub.verify_token"]
@@ -157,13 +169,20 @@ func handleMessengerWebhook(w http.ResponseWriter, r *http.Request) {
   bytes, err := ioutil.ReadAll(r.Body)
   fmt.Println("Body", string(bytes))
 
-  messengerWebhookBody := map[string]interface{}{}
+  var messengerWebhookBody MessengerWebhookBody
   err = json.Unmarshal(bytes, &messengerWebhookBody)
   if err != nil {
     fmt.Println("Could not unmarshal body")
     return
   }
 
+  senderId := messengerWebhookBody.Entries[0].Messagings[0].Sender.Id
+
+  _, alreadyAdded := messengerRecipients[senderId]
+  if !alreadyAdded {
+    fmt.Println("TODO send a welcome message")
+  }
+  messengerRecipients[senderId] = struct{}{}
 }
 
 func main() {
