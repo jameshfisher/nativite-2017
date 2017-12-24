@@ -64,32 +64,33 @@ func messageText(doerNom string, bonne bool) string {
 }
 
 func sendMessengerMsg(recipientId string, msgText string) error {
-    messengerReqBodyBytes, err := json.Marshal(MessengerRequestBody{
-      MessagingType: "UPDATE",
-      Recipient: MessengerRecipient{
-        Id: recipientId,
-      },
-      Message: MessengerMessage{
-        Text: msgText,
-      },
-    })
-    if err != nil {
-      return err
-    }
-    resp, err := http.Post(
-      "https://graph.facebook.com/v2.6/me/messages?access_token=" + os.Getenv("FACEBOOK_PAGE_ACCESS_TOKEN"),
-      "application/json",
-      strings.NewReader(string(messengerReqBodyBytes)),
-    )
-    if err != nil {
-      return err
-    }
-    messengerRespBody, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-      return err
-    }
-    fmt.Println("Sent message; body: " + string(messengerRespBody))
-    return nil
+  fmt.Println("Sending msg to recipient " + recipientId + ": " + msgText)
+  messengerReqBodyBytes, err := json.Marshal(MessengerRequestBody{
+    MessagingType: "UPDATE",
+    Recipient: MessengerRecipient{
+      Id: recipientId,
+    },
+    Message: MessengerMessage{
+      Text: msgText,
+    },
+  })
+  if err != nil {
+    return err
+  }
+  resp, err := http.Post(
+    "https://graph.facebook.com/v2.6/me/messages?access_token=" + os.Getenv("FACEBOOK_PAGE_ACCESS_TOKEN"),
+    "application/json",
+    strings.NewReader(string(messengerReqBodyBytes)),
+  )
+  if err != nil {
+    return err
+  }
+  messengerRespBody, err := ioutil.ReadAll(resp.Body)
+  if err != nil {
+    return err
+  }
+  fmt.Println("Sent message; body: " + string(messengerRespBody))
+  return nil
 }
 
 func postEvent(w http.ResponseWriter, r *http.Request) {
