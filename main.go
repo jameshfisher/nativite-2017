@@ -1,19 +1,32 @@
 package main
 
 import (
-	"io"
 	"log"
 	"net/http"
 	"os"
+  "encoding/json"
 )
 
-func scores(w http.ResponseWriter, r *http.Request) {
+type Event struct {
+  ChildName string `json:"childName"`
+  RelativePoints int `json:"relativePoints"`
+}
+
+func events(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Access-Control-Allow-Origin", "*")
-	io.WriteString(w, `{"sophie": 12, "constance": 12, "victoire": 12, "felicite": 12}`)
+  j, err := json.Marshal([]Event{
+    Event{ChildName: "sophie", RelativePoints: 1},
+    Event{ChildName: "constance", RelativePoints: 1},
+  })
+  if err != nil {
+    http.Error(w, `JSON marshal failure`, 500)
+    return
+  }
+	w.Write(j)
 }
 
 func main() {
-	http.HandleFunc("/scores", scores)
+	http.HandleFunc("/events", events)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
