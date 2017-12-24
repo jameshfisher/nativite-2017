@@ -1,5 +1,4 @@
 var audio = new Audio('./lamb.mp3');
-var first = true;
 
 var nameToVec = {
   sophie:    { x:  0, y: -0.7 },
@@ -53,18 +52,25 @@ function showScore(fille, score) {
   }
 }
 
-// FIXME initialize from DB
-["sophie", "constance", "victoire", "felicite"].forEach(function(fille) {
-  showScore(fille, 12);
-});
+function showScores(snapshot) {
+  let winner = false;
+  for (fille in snapshot) {
+    const score = snapshot[fille];
+    if (score == 0) winner = true;
+    showScore(fille, score);
+  }
 
-// FIXME set when there's a winner, i.e. a score == 0
-document.getElementById("snow").style.opacity = "0";  // if winner, "1"
+  document.getElementById("snow").style.opacity = winner ? "1": "0";
+}
+
+fetch("https://nativite-2017.herokuapp.com/scores").then(function(response) {
+  return response.json();
+}).then(showScores);
 
 // FIXME do this from Pusher
-function onEvent(snapshot) {
+function onUpdateSnapshot(snapshot) {
   console.log("Got value", snapshot);
-  if (!first) { audio.currentTime = 0; audio.play(); }
-  first = false;
+  audio.currentTime = 0;
+  audio.play();
   showScores(snapshot);
 }
