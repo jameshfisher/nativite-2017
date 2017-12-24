@@ -50,7 +50,12 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
   events = append(events, newEvent)
 
   data := map[string]string{}
-  pusherClient.Trigger("events", "new-event", data)
+  _, err = pusherClient.Trigger("events", "new-event", data)
+  if err != nil {
+    fmt.Print("Error triggering event:", err.Error())
+  } else {
+    fmt.Println("Triggered Pusher event")
+  }
 }
 
 func handleEvents(w http.ResponseWriter, r *http.Request) {
