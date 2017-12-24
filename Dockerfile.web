@@ -1,6 +1,7 @@
 # build stage
 FROM golang:alpine AS build-env
 ADD . /src
+ADD ./vendor/github.com/pusher/pusher-http-go /go/src/github.com/pusher/pusher-http-go
 RUN cd /src && go build -o goapp
 
 # final stage

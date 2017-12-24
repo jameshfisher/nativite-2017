@@ -7,12 +7,15 @@ import (
   "encoding/json"
   "io/ioutil"
   "fmt"
+  "github.com/pusher/pusher-http-go"
 )
 
 type Event struct {
   ChildName string `json:"childName"`
   RelativePoints int `json:"relativePoints"`
 }
+
+var pusherClient pusher.Client
 
 var events = []Event{
   Event{ChildName: "sophie", RelativePoints: 1},
@@ -45,6 +48,9 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
     return
   }
   events = append(events, newEvent)
+
+  data := map[string]string{}
+  pusherClient.Trigger("events", "new-event", data)
 }
 
 func handleEvents(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +64,14 @@ func handleEvents(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+  pusherClient = pusher.Client{
+    AppId: "449839",
+    Cluster: "eu",
+    Key: "e4ba82ad04291566d9d2",
+    Secret: "7b502fe2079864c184a4",
+    Secure: true,
+  }
+
 	http.HandleFunc("/events", handleEvents)
 	port := os.Getenv("PORT")
 	if port == "" {
