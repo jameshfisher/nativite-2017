@@ -7,13 +7,13 @@ import (
 	"os"
 )
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "Hello world!")
+func scores(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, `{"sophie": 12, "constance": 12, "victoire": 12, "felicite": 12}`)
 }
 
 func main() {
-	http.HandleFunc("/", hello)
-	port := os.Getenv("PORT") // Heroku provides the port to bind to
+	http.HandleFunc("/scores", scores)
+	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
