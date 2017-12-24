@@ -118,11 +118,7 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
 
   msgText := messageText(newEvent.ChildName, newEvent.RelativePoints > 0)
 
-  recipientIds := []string{
-    "1790075754377716",
-    "1708796645808201",
-  }
-  for _, recipientId := range recipientIds {
+  for recipientId, _ := range messengerRecipients {
     err := sendMessengerMsg(recipientId, msgText)
     if err != nil {
       fmt.Println("Could not send Messenger message: " + err.Error())
