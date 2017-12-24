@@ -52,10 +52,17 @@ function showScore(fille, score) {
   }
 }
 
-function showScores(snapshot) {
+function showEvents(events) {
+  const scores = {constance: 12, sophie: 12, victoire: 12, felicite: 12};  // FIXME take from response
+
+  for (const event of events) {
+    scores[event.childName] -= event.relativePoints;
+  }
+
   let winner = false;
-  for (fille in snapshot) {
-    const score = snapshot[fille];
+
+  for (const fille in scores) {
+    const score = scores[fille];
     if (score == 0) winner = true;
     showScore(fille, score);
   }
@@ -63,14 +70,14 @@ function showScores(snapshot) {
   document.getElementById("snow").style.opacity = winner ? "1": "0";
 }
 
-fetch("https://nativite-2017.herokuapp.com/scores").then(function(response) {
+fetch("https://nativite-2017.herokuapp.com/events").then(function(response) {
   return response.json();
-}).then(showScores);
+}).then(showEvents);
 
 // FIXME do this from Pusher
 function onUpdateSnapshot(snapshot) {
   console.log("Got value", snapshot);
   audio.currentTime = 0;
   audio.play();
-  showScores(snapshot);
+  showEvents(snapshot);
 }
