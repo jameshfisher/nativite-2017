@@ -16,6 +16,20 @@ type Event struct {
   RelativePoints int `json:"relativePoints"`
 }
 
+type MessengerMessage struct {
+ Text string `json:"text"`
+}
+
+type MessengerRecipient struct {
+  Id string `json:"id"`
+}
+
+type MessengerRequestBody struct {
+  MessagingType string `json:"messaging_type"`
+  Recipient MessengerRecipient `json:"recipient"`
+  Message MessengerMessage `json:"message"`
+}
+
 var pusherClient pusher.Client
 
 var events = []Event{
@@ -58,10 +72,23 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
     return
   }
 
+  messengerReqBodyBytes, err := json.Marshal(MessengerRequestBody{
+    MessagingType: "UPDATE",
+    Recipient: MessengerRecipient{
+      Id: "1790075754377716",
+    },
+    Message: MessengerMessage{
+      Text: "Hello, world!",
+    },
+  })
+  if err != nil {
+    http.Error(w, `Could not marshal request body for Messenger`, 500)
+    return
+  }
   resp, err := http.Post(
     "https://graph.facebook.com/v2.6/me/messages?access_token=" + os.Getenv("FACEBOOK_PAGE_ACCESS_TOKEN"),
     "application/json",
-    strings.NewReader(`{"messaging_type": "UPDATE", "recipient": {"id": "1790075754377716"}, "message": {"text": "Hello, world"}}`),
+    strings.NewReader(string(messengerReqBodyBytes)),
   )
   if err != nil {
     http.Error(w, `Could not send Messenger message`, 500)
