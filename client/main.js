@@ -79,7 +79,7 @@ refetch();
 
 Pusher.logToConsole = true;
 
-var pusher = new Pusher('e4ba82ad04291566d9d2', { cluster: 'eu', encrypted: true });
+var pusher = new Pusher('9fed8a726572f92df2df', { cluster: 'eu', encrypted: true });
 var channel = pusher.subscribe('events');
 channel.bind('new-event', function(_) {
   audio.currentTime = 0;

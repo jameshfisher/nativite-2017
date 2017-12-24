@@ -70,10 +70,10 @@ func handleEvents(w http.ResponseWriter, r *http.Request) {
 
 func main() {
   pusherClient = pusher.Client{
-    AppId: "449839",
-    Cluster: "eu",
-    Key: "e4ba82ad04291566d9d2",
-    Secret: "7b502fe2079864c184a4",
+    AppId: os.Getenv("PUSHER_APP_ID"),
+    Cluster: os.Getenv("PUSHER_CLUSTER"),
+    Key: os.Getenv("PUSHER_KEY"),
+    Secret: os.Getenv("PUSHER_SECRET"),
     Secure: true,
   }
 
