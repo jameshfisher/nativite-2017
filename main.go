@@ -149,7 +149,7 @@ type MessengerWebhookMessagings struct {
   Sender MessengerWebhookSender `json:"sender"`
 }
 type MessengerWebhookSender struct {
-  Id string `json:"string"`
+  Id string `json:"id"`
 }
 
 func handleMessengerWebhook(w http.ResponseWriter, r *http.Request) {
