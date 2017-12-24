@@ -69,24 +69,18 @@ func handleEvents(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMessengerWebhook(w http.ResponseWriter, r *http.Request) {
-  fmt.Print("Received messenger webhook")
-  bytes, _ := ioutil.ReadAll(r.Body)
-  fmt.Print("Body", string(bytes))
-
-  VERIFY_TOKEN := "y64wu657e"
-
-  mode := r.URL.Query()["hub.mode"][0]
-  token := r.URL.Query()["hub.verify_token"][0]
-  challenge := r.URL.Query()["hub.challenge"][0]
-
-  if mode != "" && token != "" {
-    if mode == "subscribe" && token == VERIFY_TOKEN {
-      fmt.Println("WEBHOOK_VERIFIED")
-      w.Write([]byte(challenge))
-    } else {
-      http.Error(w, `Forbidden`, 403)
-    }
+  modes := r.URL.Query()["hub.mode"]
+  tokens := r.URL.Query()["hub.verify_token"]
+  challenges := r.URL.Query()["hub.challenge"]
+  if 0 < len(modes) && string(modes[0]) == "subscribe" && 0 < len(tokens) && string(tokens[0]) == "y64wu657e" {
+    fmt.Println("WEBHOOK_VERIFIED")
+    w.Write([]byte(challenges[0]))
+    return
   }
+
+  fmt.Println("Received messenger webhook")
+  bytes, _ := ioutil.ReadAll(r.Body)
+  fmt.Println("Body", string(bytes))
 }
 
 func main() {
