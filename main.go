@@ -8,6 +8,7 @@ import (
 )
 
 func scores(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Access-Control-Allow-Origin", "*")
 	io.WriteString(w, `{"sophie": 12, "constance": 12, "victoire": 12, "felicite": 12}`)
 }
 
