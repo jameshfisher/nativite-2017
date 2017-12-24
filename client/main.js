@@ -70,14 +70,19 @@ function showEvents(events) {
   document.getElementById("snow").style.opacity = winner ? "1": "0";
 }
 
-fetch("https://nativite-2017.herokuapp.com/events").then(function(response) {
-  return response.json();
-}).then(showEvents);
+function refetch() {
+  fetch("https://nativite-2017.herokuapp.com/events").then(function(response) {
+    return response.json();
+  }).then(showEvents);
+}
+refetch();
 
-// FIXME do this from Pusher
-function onUpdateSnapshot(snapshot) {
-  console.log("Got value", snapshot);
+Pusher.logToConsole = true;
+
+var pusher = new Pusher('e4ba82ad04291566d9d2', { cluster: 'eu', encrypted: true });
+var channel = pusher.subscribe('events');
+channel.bind('new-event', function(_) {
   audio.currentTime = 0;
   audio.play();
-  showEvents(snapshot);
-}
+  refetch();
+});
