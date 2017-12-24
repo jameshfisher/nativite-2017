@@ -64,6 +64,35 @@ func messageText(doerNom string, bonne bool) string {
   }
 }
 
+func sendMessengerMsg(recipientId string, msgText string) error {
+    messengerReqBodyBytes, err := json.Marshal(MessengerRequestBody{
+      MessagingType: "UPDATE",
+      Recipient: MessengerRecipient{
+        Id: recipientId,
+      },
+      Message: MessengerMessage{
+        Text: msgText,
+      },
+    })
+    if err != nil {
+      return err
+    }
+    resp, err := http.Post(
+      "https://graph.facebook.com/v2.6/me/messages?access_token=" + os.Getenv("FACEBOOK_PAGE_ACCESS_TOKEN"),
+      "application/json",
+      strings.NewReader(string(messengerReqBodyBytes)),
+    )
+    if err != nil {
+      return err
+    }
+    messengerRespBody, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+      return err
+    }
+    fmt.Println("Sent message; body: " + string(messengerRespBody))
+    return nil
+}
+
 func postEvent(w http.ResponseWriter, r *http.Request) {
   fmt.Println("Received new event")
   w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -88,34 +117,20 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  messengerReqBodyBytes, err := json.Marshal(MessengerRequestBody{
-    MessagingType: "UPDATE",
-    Recipient: MessengerRecipient{
-      Id: "1790075754377716",
-    },
-    Message: MessengerMessage{
-      Text: messageText(newEvent.ChildName, newEvent.RelativePoints > 0),
-    },
-  })
-  if err != nil {
-    http.Error(w, `Could not marshal request body for Messenger`, 500)
-    return
+  msgText := messageText(newEvent.ChildName, newEvent.RelativePoints > 0)
+
+  recipientIds := []string{
+    "1790075754377716",
+    "1708796645808201",
   }
-  resp, err := http.Post(
-    "https://graph.facebook.com/v2.6/me/messages?access_token=" + os.Getenv("FACEBOOK_PAGE_ACCESS_TOKEN"),
-    "application/json",
-    strings.NewReader(string(messengerReqBodyBytes)),
-  )
-  if err != nil {
-    http.Error(w, `Could not send Messenger message`, 500)
-    return
+  for _, recipientId := range recipientIds {
+    err := sendMessengerMsg(recipientId, msgText)
+    if err != nil {
+      fmt.Println("Could not send Messenger message: " + err.Error())
+      http.Error(w, `Could not send Messenger message`, 500)
+      return
+    }
   }
-  messengerRespBody, err := ioutil.ReadAll(resp.Body)
-  if err != nil {
-    http.Error(w, `Could not read Messenger response body`, 500)
-    return
-  }
-  fmt.Println("Sent message; body: " + string(messengerRespBody))
 }
 
 func handleEvents(w http.ResponseWriter, r *http.Request) {
@@ -139,8 +154,16 @@ func handleMessengerWebhook(w http.ResponseWriter, r *http.Request) {
   }
 
   fmt.Println("Received messenger webhook")
-  bytes, _ := ioutil.ReadAll(r.Body)
+  bytes, err := ioutil.ReadAll(r.Body)
   fmt.Println("Body", string(bytes))
+
+  messengerWebhookBody := map[string]interface{}{}
+  err = json.Unmarshal(bytes, &messengerWebhookBody)
+  if err != nil {
+    fmt.Println("Could not unmarshal body")
+    return
+  }
+
 }
 
 func main() {
