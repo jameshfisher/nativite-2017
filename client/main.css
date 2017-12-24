@@ -1,0 +1,42 @@
+.icon {
+  image-rendering: pixelated;
+  position: absolute;
+}
+.icon64 {
+  background-size: 64px; width: 64px; height: 64px;
+}
+.icon128 {
+  background-size: 128px; width: 128px; height: 128px;
+}
+.label {
+  background-size: 136px; width: 136px; height: 48px;
+}
+.score {
+  background-size: 56px; width: 56px; height: 24px;
+  background-image: url('./images/score.png');
+}
+
+#floor {
+  image-rendering: pixelated;
+  position: absolute;
+  background-size: 1024px;
+  background-position: center;
+  width: 1024px;
+  height: 1024px;
+  margin-left: -512px;
+  margin-top: -512px;
+  background-image: url('./images/floor.png');
+}
+
+#snow {
+  opacity: 0;
+  image-rendering: pixelated;
+  position: absolute;
+  background-size: 1024px;
+  background-position: center;
+  width: 1024px;
+  height: 1024px;
+  margin-left: -512px;
+  margin-top: -512px;
+  background-image: url('./images/snow.gif');
+}
