@@ -49,6 +49,26 @@ var realNames = map[string]string{
 func getEvents(w http.ResponseWriter, r *http.Request) {
   fmt.Println("Serving events")
   w.Header().Set("Access-Control-Allow-Origin", "*")
+
+  rows, err := db.Query("SELECT child_name, relative_points FROM events ORDER BY timestamp ASC")
+  if err != nil {
+    http.Error(w, `Could not get recipients`, 500)
+    return
+  }
+  defer rows.Close()
+
+  events := []Event{}
+
+  for rows.Next() {
+    var event Event
+    err := rows.Scan(&event.ChildName, &event.RelativePoints)
+    if err != nil {
+      http.Error(w, `Could not scan event`, 500)
+      return
+    }
+    events = append(events, event)
+  }
+
   j, err := json.Marshal(events)
   if err != nil {
     http.Error(w, `JSON marshal failure`, 500)
