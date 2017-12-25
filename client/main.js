@@ -60,14 +60,19 @@ function showEvents(events) {
   }
 
   let winner = false;
+  let lowestScore = 12;
 
   for (const fille in scores) {
     const score = scores[fille];
-    if (score == 0) winner = true;
+    lowestScore = Math.min(lowestScore, score);
     showScore(fille, score);
   }
 
-  document.getElementById("snow").style.opacity = winner ? "1": "0";
+  for (const fille in scores) {
+    document.getElementById(fille).classList.toggle("winning", scores[fille] === lowestScore);
+  }
+
+  document.getElementById("snow").style.opacity = lowestScore === 0 ? "1": "0";
 }
 
 function refetch() {
