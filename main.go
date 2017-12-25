@@ -46,8 +46,6 @@ var realNames = map[string]string{
   "james": "James",
 }
 
-var messengerRecipients = map[string]struct{}{}
-
 func getEvents(w http.ResponseWriter, r *http.Request) {
   fmt.Println("Serving events")
   w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -223,7 +221,6 @@ func handleMessengerWebhook(w http.ResponseWriter, r *http.Request) {
       return
     }
   }
-  messengerRecipients[senderId] = struct{}{}
 }
 
 func main() {
