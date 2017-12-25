@@ -11,6 +11,7 @@ import (
   "strings"
 	"database/sql"
 	_ "github.com/lib/pq"
+  "time"
 )
 
 type Event struct {
@@ -35,8 +36,6 @@ type MessengerRequestBody struct {
 var pusherClient pusher.Client
 
 var db *sql.DB
-
-var events = []Event{}
 
 var realNames = map[string]string{
   "sophie": "Sophie",
@@ -121,7 +120,15 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
     http.Error(w, `Could not unmarshal JSON from body`, 400)
     return
   }
-  events = append(events, newEvent)
+
+  _, err = db.Exec(
+    "INSERT INTO events (timestamp, child_name, relative_points) values ($1, $2, $3)",
+    time.Now().Unix(), newEvent.ChildName, newEvent.RelativePoints)
+  if err != nil {
+    log.Println("Could not insert event: " + err.Error())
+    http.Error(w, `Could not insert event`, 500)
+    return
+  }
 
   data := map[string]string{}
   _, err = pusherClient.Trigger("events", "new-event", data)
