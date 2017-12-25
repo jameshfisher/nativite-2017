@@ -78,9 +78,9 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 
 func messageText(doerNom string, bonne bool) string {
   if bonne {
-    return realNames[doerNom] + " a fait une bonne chose! Dépêchez-vous, elle pourrait gagner le prix mystère!"
+    return realNames[doerNom] + " a fait une bonne chose ! Dépêchez-vous, elle pourrait gagner le prix mystère !"
   } else {
-    return realNames[doerNom] + " a fait une mauvaise chose! :O"
+    return realNames[doerNom] + " a fait une mauvaise chose ! :O"
   }
 }
 
@@ -239,7 +239,7 @@ func handleMessengerWebhook(w http.ResponseWriter, r *http.Request) {
         Id: senderId,
       },
       Message: MessengerMessage{
-        Text: "Salut mon petit mouton! Joyeux Noël et bonne chance! :)",
+        Text: "Salut mon petit mouton ! Joyeux Noël et bonne chance ! Voir vos progrès sur https://nativite-2017.lantreibecq.com/ :)",
       },
     })
     if err != nil {
