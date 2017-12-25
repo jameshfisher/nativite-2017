@@ -9,6 +9,8 @@ import (
   "fmt"
   "github.com/pusher/pusher-http-go"
   "strings"
+	"database/sql"
+	_ "github.com/lib/pq"
 )
 
 type Event struct {
@@ -31,6 +33,8 @@ type MessengerRequestBody struct {
 }
 
 var pusherClient pusher.Client
+
+var db *sql.DB
 
 var events = []Event{}
 
@@ -111,8 +115,21 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
 
   msgText := messageText(newEvent.ChildName, newEvent.RelativePoints > 0)
 
-  for recipientId, _ := range messengerRecipients {
-    err := sendMessengerMsg(MessengerRequestBody{
+  rows, err := db.Query("SELECT id FROM recipients")
+  if err != nil {
+    http.Error(w, `Could not get recipients`, 500)
+    return
+  }
+  defer rows.Close()
+
+  for rows.Next() {
+    var recipientId string
+    err := rows.Scan(&recipientId)
+    if err != nil {
+      http.Error(w, `Could not scan recipient`, 500)
+      return
+    }
+    err = sendMessengerMsg(MessengerRequestBody{
       MessagingType: "UPDATE",
       Recipient: MessengerRecipient{
         Id: recipientId,
@@ -175,7 +192,20 @@ func handleMessengerWebhook(w http.ResponseWriter, r *http.Request) {
 
   senderId := messengerWebhookBody.Entries[0].Messagings[0].Sender.Id
 
-  _, alreadyAdded := messengerRecipients[senderId]
+  res, err := db.Exec("INSERT INTO recipients (id) VALUES ($1) ON CONFLICT DO NOTHING", senderId)
+  if err != nil {
+    fmt.Println("Couldn't insert recipient: " + err.Error())
+    http.Error(w, `Could not insert recipient`, 500)
+    return
+  }
+
+  rowsAffected, err := res.RowsAffected()
+  if err != nil {
+    fmt.Println("Could not get rows affected")
+    http.Error(w, `Could not get rows affected`, 500)
+    return
+  }
+  alreadyAdded := rowsAffected == 0
   if !alreadyAdded {
     fmt.Println("TODO send a welcome message")
     err = sendMessengerMsg(MessengerRequestBody{
@@ -204,6 +234,12 @@ func main() {
     Secret: os.Getenv("PUSHER_SECRET"),
     Secure: true,
   }
+
+  var err error
+	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	http.HandleFunc("/events", handleEvents)
   http.HandleFunc("/messenger-webhook", handleMessengerWebhook)

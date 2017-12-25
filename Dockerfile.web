@@ -2,6 +2,7 @@
 FROM golang:alpine AS build-env
 ADD main.go /src/main.go
 ADD ./vendor/github.com/pusher/pusher-http-go /go/src/github.com/pusher/pusher-http-go
+ADD ./vendor/github.com/lib/pq /go/src/github.com/lib/pq
 RUN cd /src && go build -o goapp
 
 # final stage

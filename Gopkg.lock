@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/lib/pq"
+  packages = [".","oid"]
+  revision = "83612a56d3dd153a94a629cd64925371c9adad78"
+
+[[projects]]
   name = "github.com/pusher/pusher-http-go"
   packages = ["."]
   revision = "ea13abeb083c60527a59138c8c5b906574b7cef2"
@@ -10,6 +16,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7cc6621d33e046283db60e1d5fbc8040b00a3b38b7b9496e26ca66838a1ea6da"
+  inputs-digest = "4e0f06a7e419d65944cfc8217b0a5642efc4ffd33a7fb3a815afeff729fb967a"
   solver-name = "gps-cdcl"
   solver-version = 1
