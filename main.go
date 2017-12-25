@@ -63,17 +63,9 @@ func messageText(doerNom string, bonne bool) string {
   }
 }
 
-func sendMessengerMsg(recipientId string, msgText string) error {
-  fmt.Println("Sending msg to recipient " + recipientId + ": " + msgText)
-  messengerReqBodyBytes, err := json.Marshal(MessengerRequestBody{
-    MessagingType: "UPDATE",
-    Recipient: MessengerRecipient{
-      Id: recipientId,
-    },
-    Message: MessengerMessage{
-      Text: msgText,
-    },
-  })
+func sendMessengerMsg(messengerRequestBody MessengerRequestBody) error {
+  fmt.Println("Sending msg: " + fmt.Sprintf("%#v", messengerRequestBody))
+  messengerReqBodyBytes, err := json.Marshal(messengerRequestBody)
   if err != nil {
     return err
   }
@@ -120,7 +112,15 @@ func postEvent(w http.ResponseWriter, r *http.Request) {
   msgText := messageText(newEvent.ChildName, newEvent.RelativePoints > 0)
 
   for recipientId, _ := range messengerRecipients {
-    err := sendMessengerMsg(recipientId, msgText)
+    err := sendMessengerMsg(MessengerRequestBody{
+      MessagingType: "UPDATE",
+      Recipient: MessengerRecipient{
+        Id: recipientId,
+      },
+      Message: MessengerMessage{
+        Text: msgText,
+      },
+    })
     if err != nil {
       fmt.Println("Could not send Messenger message: " + err.Error())
       http.Error(w, `Could not send Messenger message`, 500)
@@ -178,6 +178,20 @@ func handleMessengerWebhook(w http.ResponseWriter, r *http.Request) {
   _, alreadyAdded := messengerRecipients[senderId]
   if !alreadyAdded {
     fmt.Println("TODO send a welcome message")
+    err = sendMessengerMsg(MessengerRequestBody{
+      MessagingType: "UPDATE", // TODO should be RESPONSE
+      Recipient: MessengerRecipient{
+        Id: senderId,
+      },
+      Message: MessengerMessage{
+        Text: "Salut mon petit mouton! Joyeux Noël et bonne chance! :)",
+      },
+    })
+    if err != nil {
+      fmt.Println("Could not send Messenger message: " + err.Error())
+      http.Error(w, `Could not send Messenger message`, 500)
+      return
+    }
   }
   messengerRecipients[senderId] = struct{}{}
 }
